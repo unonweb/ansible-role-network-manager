@@ -1,0 +1,6 @@
+---
+network_manager:
+  dispatcher:
+    no_wait: []
+    pre_down: []
+    pre_up: []

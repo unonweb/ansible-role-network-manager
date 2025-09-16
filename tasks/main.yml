@@ -1,0 +1,44 @@
+---
+# NOTES
+# -----
+
+- name: network-manager role
+  tags:
+    - network-manager
+  block:
+
+  # dispatcher scripts
+  - block:
+
+    # pre-down
+    - when: network_manager.dispatcher.pre_down | length > 0
+      name: Copy pre-down dispatcher scripts
+      become: true
+      loop: "{{ network_manager.dispatcher.pre_down }}"
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /etc/NetworkManager/dispatcher.d/pre-down.d
+        owner: root
+        mode: u=rwx,g=,o=rx
+
+    # pre-up
+    - when: network_manager.dispatcher.pre_up | length > 0
+      name: Copy pre-up dispatcher scripts
+      become: true
+      loop: "{{ network_manager.dispatcher.pre_up }}"
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /etc/NetworkManager/dispatcher.d/pre-up.d
+        owner: root
+        mode: u=rwx,g=,o=rx
+
+    # no-wait
+    - when: network_manager.dispatcher.no_wait | length > 0
+      name: Copy no-wait dispatcher scripts
+      become: true
+      loop: "{{ network_manager.dispatcher.no_wait }}"
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /etc/NetworkManager/dispatcher.d/no-wait.d
+        owner: root
+        mode: u=rwx,g=,o=rx
