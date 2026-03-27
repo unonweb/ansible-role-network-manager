@@ -1,6 +1,13 @@
 ---
-network_manager:
-  dispatcher:
-    no_wait: []
-    pre_down: []
-    pre_up: []
+network_manager_wifi_connections: [] # list of dicionaries
+# name
+# ssid
+# psk
+# mode: infrastructure
+# method4: auto
+# method6: auto
+# autoconnect: false
+# key_mgmt: wpa-psk
+network_manager_dispatcher_no_wait: []
+network_manager_dispatcher_pre_down: []
+network_manager_dispatcher_pre_up: []
