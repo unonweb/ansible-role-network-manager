@@ -1,0 +1,35 @@
+---
+# assertions
+- name: Assertions for wifi connections
+  loop: "{{ network_manager_wifi_connections }}"
+  loop_control:
+    loop_var: connection
+  ansible.builtin.assert:
+    that:
+    - connection.name != None
+    - connection.ssid != None
+    - connection.psk != None
+    - __network_manager_primary_wifi != None
+
+# setup wifi connections
+- name: Setup wifi connections
+  become: true
+  notify: Reload NetworkManager
+  loop: "{{ network_manager_wifi_connections }}"
+  loop_control:
+    loop_var: connection
+  no_log: true
+  community.general.nmcli:
+    type: wifi
+    state: present
+    conn_name: "{{ connection.name }}" # The name used to call the connection. Pattern is <type>[-<ifname>][-<num>].
+    ifname: "{{ __network_manager_primary_wifi }}"
+    autoconnect: "{{ connection.autoconnect | default(false) }}"
+    ssid: "{{ connection.ssid }}"
+    method4: "{{ connection.method4 | default('auto') }}"
+    method6: "{{ connection.method6 | default('auto') }}"
+    wifi:
+      mode: "{{ connection.mode | default('infrastructure') }}"
+    wifi_sec:
+      key-mgmt: "{{ connection.key_mgmt | default('wpa-psk') }}"
+      psk: "{{ connection.psk }}"
