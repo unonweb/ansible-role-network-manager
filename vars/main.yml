@@ -1,0 +1,2 @@
+__network_manager_connections_wireguard: "{{ network_manager_connections_wireguard | default([]) | map('combine', network_manager_connections_wireguard_defaults, recursive=True) | list }}"
+__network_manager_connections_wifi: "{{ network_manager_connections_wifi | default([]) | map('combine', network_manager_connections_wifi_defaults, recursive=True) | list }}"

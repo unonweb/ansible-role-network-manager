@@ -1,13 +1,45 @@
 ---
-network_manager_wifi_connections: [] # list of dicionaries
+# WIFI
+# ====
+network_manager_connections_wifi: [] # list of dicionaries
+# state
 # name
 # ssid
+# mode
+# autoconnect
+# method4
+# method6
+# key_mgmt
 # psk
-# mode: infrastructure
-# method4: auto
-# method6: auto
-# autoconnect: false
-# key_mgmt: wpa-psk
+
+network_manager_connections_wifi_defaults:
+  state: present
+  mode: infrastructure
+  autoconnect: false
+  method4: auto
+  method6: auto
+  key_mgmt: wpa-psk
+
+# WIREGUARD
+# =========
+network_manager_connections_wireguard: [] # list of dicionaries
+# name
+# ifname
+# peer_public_key
+# peer_endpoint
+# peer_allowed_ips
+# private_key
+# ip4
+# dns4
+# dns4_search
+
+network_manager_connections_wireguard_defaults:
+  state: present
+  autoconnect: false
+  dns4_search: "~"
+
+# DISPATCHER
+# ==========
 network_manager_dispatcher_no_wait: []
 network_manager_dispatcher_pre_down: []
 network_manager_dispatcher_pre_up: []
