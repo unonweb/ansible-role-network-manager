@@ -30,7 +30,7 @@
     community.general.nmcli:
       type: wireguard
       conn_name: "{{ connection.name }}"
-      ifname: "{{ connection.ifname }}"
+      ifname: "{{ connection.ifname | default(connection.name) }}"
       autoconnect: "{{ connection.autoconnect }}"
       state: "{{ connection.state }}"
       ip4: "{{ connection.ip4 }}"
