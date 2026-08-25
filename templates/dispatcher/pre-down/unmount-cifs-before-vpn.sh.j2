@@ -1,0 +1,32 @@
+#!/usr/bin/bash
+
+# NetworkManager dispatcher script: Unmount CIFS shares before VPN/interface goes down
+
+INTERFACE="${1:-}"
+ACTION="${2:-}"
+
+# Populate Bash array from Ansible list variable
+VPNS=(
+{% for conn in network_manager_connections_wireguard %}
+  "{{ conn.name }}"
+{% endfor %}
+)
+
+# Function to check if interface is in the array
+function is_monitored_vpn {
+	local vpn
+	for vpn in "${VPNS[@]}"; do
+		if [[ "${vpn}" == "${1}" ]]; then
+			return 0
+		fi
+	done
+	return 1
+}
+
+# Unmount on 'pre-down' or 'down' events for any matched VPN interface
+if is_monitored_vpn "${INTERFACE}" && [[ "${ACTION}" == "pre-down" || "${ACTION}" == "down" ]]; then
+	if /usr/bin/mount -t cifs >/dev/null 2>&1; then
+		echo "Interface ${INTERFACE} going down. Unmounting all CIFS shares..."
+		/usr/bin/umount --all --types cifs --force --lazy || true
+	fi
+fi
