@@ -13,7 +13,7 @@
   # set fact
   - name: Set fact for primary wifi interface
     ansible.builtin.set_fact:
-      __network_manager_primary_wifi: "{{ ansible_facts.interfaces | select('match', '^wl') | list | first }}"
+      __network_manager_primary_wifi: "{{ ansible_facts['interfaces'] | select('match', '^wl') | list | first }}"
 
   # debug
   - ansible.builtin.debug:
