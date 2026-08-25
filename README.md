@@ -17,7 +17,7 @@ b) Store connection in `~/.config/NetworkManager/`
 - name: Add user permissions to wifi profiles
 	become: true
 	notify: Reload NetworkManager
-	loop: "{{ network_manager_wifi_connections }}"
+	loop: "{{ network_manager_connections_wifi }}"
 	loop_control:
 	loop_var: connection
 	ansible.builtin.lineinfile:

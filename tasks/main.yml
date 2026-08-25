@@ -4,6 +4,13 @@
   - network-manager
   block:
 
+  # install
+  - name: Apt install network-manager
+    become: true
+    ansible.builtin.apt:
+      name: network-manager
+      state: present
+
   # gather facts
   - name: Gather interface facts
     ansible.builtin.setup:
@@ -20,8 +27,12 @@
       var: __network_manager_primary_wifi
 
   # wifi connections
-  - when: network_manager_wifi_connections | length > 0
-    ansible.builtin.import_tasks: wifi.yml
+  - when: network_manager_connections_wifi | length > 0
+    ansible.builtin.import_tasks: setup-wifi.yml
+
+  # wireguard connections
+  - when: network_manager_connections_wireguard | length > 0
+    ansible.builtin.import_tasks: setup-wireguard.yml
 
   # dispatcher scripts
   - ansible.builtin.import_tasks: dispatcher.yml
