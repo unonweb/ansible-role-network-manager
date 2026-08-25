@@ -1,33 +1,36 @@
 ---
-# pre-down
-- when: network_manager_dispatcher_pre_down | length > 0
-  name: Copy pre-down dispatcher scripts
-  become: true
-  loop: "{{ network_manager_dispatcher_pre_down }}"
-  ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: /etc/NetworkManager/dispatcher.d/pre-down.d
-    owner: root
-    mode: u=rwx,g=,o=rx
+- tags: [network-manager-dispatcher]
+  block:
 
-# pre-up
-- when: network_manager_dispatcher_pre_up | length > 0
-  name: Copy pre-up dispatcher scripts
-  become: true
-  loop: "{{ network_manager_dispatcher_pre_up }}"
-  ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: /etc/NetworkManager/dispatcher.d/pre-up.d
-    owner: root
-    mode: u=rwx,g=,o=rx
+  # pre-down
+  - when: network_manager_dispatcher_pre_down | length > 0
+    name: Template pre-down dispatcher scripts
+    become: true
+    loop: "{{ network_manager_dispatcher_pre_down }}"
+    ansible.builtin.template:
+      src: "dispatcher/pre-down/{{ item }}"
+      dest: "/etc/NetworkManager/dispatcher.d/pre-down.d/{{ item.replace('.j2', '') }}"
+      owner: root
+      mode: u=rwx,g=,o=rx
 
-# no-wait
-- when: network_manager_dispatcher_no_wait | length > 0
-  name: Copy no-wait dispatcher scripts
-  become: true
-  loop: "{{ network_manager_dispatcher_no_wait }}"
-  ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: /etc/NetworkManager/dispatcher.d/no-wait.d
-    owner: root
-    mode: u=rwx,g=,o=rx
+  # pre-up
+  - when: network_manager_dispatcher_pre_up | length > 0
+    name: Template pre-up dispatcher scripts
+    become: true
+    loop: "{{ network_manager_dispatcher_pre_up }}"
+    ansible.builtin.template:
+      src: "dispatcher/pre-up/{{ item }}"
+      dest: "/etc/NetworkManager/dispatcher.d/pre-up.d/{{ item.replace('.j2', '') }}"
+      owner: root
+      mode: u=rwx,g=,o=rx
+
+  # no-wait
+  - when: network_manager_dispatcher_no_wait | length > 0
+    name: Template no-wait dispatcher scripts
+    become: true
+    loop: "{{ network_manager_dispatcher_no_wait }}"
+    ansible.builtin.template:
+      src: "dispatcher/no-wait/{{ item }}"
+      dest: "/etc/NetworkManager/dispatcher.d/no-wait.d/{{ item.replace('.j2', '') }}"
+      owner: root
+      mode: u=rwx,g=,o=rx
