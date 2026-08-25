@@ -1,68 +1,72 @@
 ---
-- name: Assertions for wireguard connections
-  loop: "{{ __network_manager_connections_wireguard }}"
-  loop_control:
-    loop_var: connection
-  ansible.builtin.assert:
-    that:
-    - connection.name != None
-    - connection.ip4 != None
-    - connection.dns4 != None
-    - connection.private_key != None
-    - connection.peer_allowed_ips != None
-    - connection.peer_endpoint != None
-    - connection.peer_public_key != None
+- tags: [network-manager-wireguard]
+  when: network_manager_connections_wireguard | length > 0
+  block:
 
-# create connection
-# we need to use the nmcli tool to get a UUID for the connection
-# not idempotent!
-- name: Create a NetworkManager connection for wireguard
-  become: true
-  notify: Reload NetworkManager
-  loop: "{{ __network_manager_connections_wireguard }}"
-  loop_control:
-    loop_var: connection
-  no_log: true
-  community.general.nmcli:
-    type: wireguard
-    conn_name: "{{ connection.name }}"
-    ifname: "{{ connection.ifname }}"
-    autoconnect: "{{ connection.autoconnect }}"
-    state: "{{ connection.state }}"
-    ip4: "{{ connection.ip4 }}"
-    dns4: "{{ connection.dns4 }}"
-    dns4_search: "{{ connection.dns4_search }}"
-    method6: disabled
-    wireguard:
-        private-key: "{{ connection.private_key }}"
+  - name: Assertions for wireguard connections
+    loop: "{{ __network_manager_connections_wireguard }}"
+    loop_control:
+      loop_var: connection
+    ansible.builtin.assert:
+      that:
+      - connection.name != None
+      - connection.ip4 != None
+      - connection.dns4 != None
+      - connection.private_key != None
+      - connection.peer_allowed_ips != None
+      - connection.peer_endpoint != None
+      - connection.peer_public_key != None
 
-# remove existing wireguard peer section
-- name: Remove existing peers entry
-  tags: regex
-  become: true
-  loop: "{{ __network_manager_connections_wireguard }}"
-  loop_control:
-    loop_var: connection
-  ansible.builtin.replace:
-    path: "/etc/NetworkManager/system-connections/{{ connection.name }}.nmconnection"
-    regexp: '\[wireguard-peer[\s\S]*?0\.0\.0\.0\/0;'
-    replace: ""
+  # create connection
+  # we need to use the nmcli tool to get a UUID for the connection
+  # not idempotent!
+  - name: Create a NetworkManager connection for wireguard
+    become: true
+    notify: Reload NetworkManager
+    loop: "{{ __network_manager_connections_wireguard }}"
+    loop_control:
+      loop_var: connection
+    no_log: true
+    community.general.nmcli:
+      type: wireguard
+      conn_name: "{{ connection.name }}"
+      ifname: "{{ connection.ifname }}"
+      autoconnect: "{{ connection.autoconnect }}"
+      state: "{{ connection.state }}"
+      ip4: "{{ connection.ip4 }}"
+      dns4: "{{ connection.dns4 }}"
+      dns4_search: "{{ connection.dns4_search }}"
+      method6: disabled
+      wireguard:
+          private-key: "{{ connection.private_key }}"
 
-# insert wireguard section
-- name: Insert block into {{ connection.name }}.nmconnection # not idempotent!
-  become: true
-  notify: Reload NetworkManager
-  loop: "{{ __network_manager_connections_wireguard }}"
-  loop_control:
-    loop_var: connection
-  ansible.builtin.blockinfile:
-    path: "/etc/NetworkManager/system-connections/{{ connection.name }}.nmconnection"
-    group: root
-    owner: root
-    mode: u=rw,g=,o=
-    append_newline: true
-    prepend_newline: true
-    block: |
-      [wireguard-peer.{{ connection.peer_public_key }}]
-      endpoint={{ connection.peer_endpoint }}
-      allowed-ips={{ connection.peer_allowed_ips }}
+  # remove existing wireguard peer section
+  - name: Remove existing peers entry
+    tags: regex
+    become: true
+    loop: "{{ __network_manager_connections_wireguard }}"
+    loop_control:
+      loop_var: connection
+    ansible.builtin.replace:
+      path: "/etc/NetworkManager/system-connections/{{ connection.name }}.nmconnection"
+      regexp: '\[wireguard-peer[\s\S]*?0\.0\.0\.0\/0;'
+      replace: ""
+
+  # insert wireguard section
+  - name: Insert block into {{ connection.name }}.nmconnection # not idempotent!
+    become: true
+    notify: Reload NetworkManager
+    loop: "{{ __network_manager_connections_wireguard }}"
+    loop_control:
+      loop_var: connection
+    ansible.builtin.blockinfile:
+      path: "/etc/NetworkManager/system-connections/{{ connection.name }}.nmconnection"
+      group: root
+      owner: root
+      mode: u=rw,g=,o=
+      append_newline: true
+      prepend_newline: true
+      block: |
+        [wireguard-peer.{{ connection.peer_public_key }}]
+        endpoint={{ connection.peer_endpoint }}
+        allowed-ips={{ connection.peer_allowed_ips }}
