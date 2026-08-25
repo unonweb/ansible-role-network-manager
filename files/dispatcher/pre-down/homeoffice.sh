@@ -1,30 +1,15 @@
-#!/bin/bash
+#!/usr/bin/bash
 
-# TASK
-# ----
-# Before interface "homeoffice" is deactivated (pre-down) unmount all of the given mountpoints
+# NetworkManager dispatcher script: Unmount CIFS shares before VPN/interface goes down
 
-INTERFACE="${1}"
-EVENT="${2}"
+INTERFACE="${1:-}"
+ACTION="${2:-}"
 
-MOUNTPOINTS=(
-	"/media/it"
-	"/media/nasenbaer"
-	"/media/personal"
-	"/media/theke"
-)
+if [[ "${INTERFACE}" == "homeoffice" ]] && [[ "${ACTION}" == "pre-down" ]]; then
 
-if [[ "${INTERFACE}" == "homeoffice" ]]; then
-
-    # using gio (gnome input output) instead of umount to unmount makes nautilus aware of the unmounts
-    # so we avoid nautilus to hang if trying to unmount an already unmounted device
-
-	for mountpoint in "${MOUNTPOINTS[@]}"; do
-		findmnt "${mountpoint}" > /dev/null
-		if [[ $? == 0 ]]; then
-			echo "gio mount --unmount ${mountpoint}"
-			gio mount --unmount "${mountpoint}"
-		fi	
-	done
-
+	# Check if any cifs shares are actually mounted before attempting unmount
+    if mount -t cifs >/dev/null 2>&1; then
+        # Use absolute paths and force option for unresponsive network drives
+        /usr/bin/umount --all --types cifs --force --lazy || true
+    fi
 fi
