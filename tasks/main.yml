@@ -1,7 +1,6 @@
 ---
 - name: network-manager role
-  tags:
-  - network-manager
+  tags: [network-manager]
   block:
 
   # install
