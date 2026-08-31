@@ -23,10 +23,13 @@ function is_monitored_vpn {
 	return 1
 }
 
+echo "${ACTION} ${INTERFACE}"
+echo "Monitored VPNs: ${VPNS[@]}"
+
 # Unmount on 'pre-down' or 'down' events for any matched VPN interface
 if is_monitored_vpn "${INTERFACE}" && [[ "${ACTION}" == "pre-down" || "${ACTION}" == "down" ]]; then
 	if /usr/bin/mount -t cifs >/dev/null 2>&1; then
-		echo "Interface ${INTERFACE} going down. Unmounting all CIFS shares..."
+		echo "Unmounting all CIFS shares..."
 		/usr/bin/umount --all --types cifs --force --lazy || true
 	fi
 fi
